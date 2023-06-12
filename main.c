@@ -1,5 +1,5 @@
 /*
- *Single player game of Pong with 1 level
+ *Single player game of Pong with 1 level where bricks are to be destroyed to gain points
  *@author: Rohan Menon bossman
  *@date: 9th June 2023
  */
@@ -14,7 +14,7 @@
 #define BRICK_WIDTH 20
 
 #define PADDLE_WIDTH 80
-#define PADDLE_HEIGHT 15
+#define PADDLE_HEIGHT 15 //Do not want to make it the same as ball height
 #define PADDLE_SPEED 5
 
 #define BALL_SIZE 10
@@ -27,7 +27,7 @@
 /*
  *How to compile -  gcc -I src/include -L src/lib main.c -lSDL2
  */
-
+//SDL_Rect struct only takes ints as parameters
 // Structure for the pong ball
 typedef struct ballStruct {
     int x;
@@ -49,19 +49,6 @@ typedef struct {
     int destroyed; // Flag to indicate if the brick is destroyed
 } Brick;
 
-// Initialize the paddle's position
-void initializePaddle(Paddle *paddle) {
-    paddle->x = WINDOW_WIDTH / 2 - PADDLE_WIDTH / 2;
-    paddle->y = WINDOW_HEIGHT - PADDLE_HEIGHT - 10;
-}
-
-// Initialize the ball's position and velocity
-void initializeBall(Ball *ball) {
-    ball->x = WINDOW_WIDTH / 2 - BALL_SIZE / 2;
-    ball->y = WINDOW_HEIGHT / 2 - BALL_SIZE / 2;
-    ball->dx = BALL_SPEED_X;
-    ball->dy = BALL_SPEED_Y;
-}
 
 // Initialize the bricks
 void initializeBricks(Brick *bricks, int numRows, int numCols) {
@@ -109,7 +96,7 @@ void moveBall(Ball *ball, int *score, Paddle *paddle) {
     }
 
     // Check for paddle collision
-    if (ball->y + BALL_SIZE >= paddle->y + 1) {
+    if (ball->y + BALL_SIZE >= paddle->y) {
         if (ball->x + BALL_SIZE >= paddle->x && ball->x <= paddle->x + PADDLE_WIDTH) {
             ball->dy = -ball->dy; // Reverse the vertical velocity
             *score += 1;
@@ -175,25 +162,23 @@ int main() {
 
     // Create a window
     SDL_Window *window = SDL_CreateWindow("Pong", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
-    if (window == NULL)
-    {
+    if (window == NULL) {
         printf("Window creation failed: %s\n", SDL_GetError());
         return 1;
     }
 
     // Create a renderer
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    if (renderer == NULL)
-    {
-        printf("Renderer creation failed: %s\n", SDL_GetError());
+    if (renderer == NULL) {
+        printf("Got rendering error: %s\n", SDL_GetError());
         return 1;
     }
 
-    // Create the paddle and the ball
+    // Paddle and ball
     Paddle paddle;
     Ball ball;
 
-    //Initializing paddle fields
+    
     // Initialize the paddle's position
     paddle.x = WINDOW_WIDTH / 2 - PADDLE_WIDTH / 2;
     paddle.y = WINDOW_HEIGHT - PADDLE_HEIGHT - 10;
@@ -204,17 +189,17 @@ int main() {
     ball.dx = BALL_SPEED_X;
     ball.dy = BALL_SPEED_Y;
     
-    // Create the bricks
+    //Creating brick structs
     const int numRows = 5;
     const int numCols = 8;
     Brick bricks[40];
     initializeBricks(bricks, numRows, numCols);
-
-    // Game loop
+    
+    //Main loop
     int quit = 0;
     int score = 0;
     SDL_Event event;
-    while (!quit)   {
+    while (!quit)  {
         // Process events
         SDL_PollEvent(&event);
         if (event.type == SDL_QUIT) {
