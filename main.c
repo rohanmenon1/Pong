@@ -100,7 +100,7 @@ int moveBall(Ball *ball, int *score, Paddle *paddle) {
     // Check for paddle collision
     if (ball->y + BALL_SIZE >= paddle->y) {
         if (ball->x + BALL_SIZE >= paddle->x && ball->x <= paddle->x + PADDLE_WIDTH) {
-            System.out.println("Kowabunga");
+            printf("Kowabunga");
 
             ball->dy = -ball->dy; // Reverse the vertical velocity
             
