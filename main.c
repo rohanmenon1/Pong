@@ -10,8 +10,8 @@
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 
-#define BRICK_HEIGHT 10
-#define BRICK_WIDTH 20
+#define BRICK_HEIGHT 5
+#define BRICK_WIDTH 5
 
 #define PADDLE_WIDTH 80
 #define PADDLE_HEIGHT 15 //Do not want to make it the same as ball height
@@ -78,7 +78,8 @@ void movePaddle(Paddle *paddle) {
 }
 
 // Move the ball and handle collisions
-void moveBall(Ball *ball, int *score, Paddle *paddle) {
+//Changed return type to int to indicate if paddle collision ocurred
+int moveBall(Ball *ball, int *score, Paddle *paddle) {
     // Move the ball
     ball->x += ball->dx;
     ball->y += ball->dy;
@@ -90,7 +91,8 @@ void moveBall(Ball *ball, int *score, Paddle *paddle) {
     if (ball->y <= 0) { //Top window collision
         ball->dy = -ball->dy; 
     }
-
+    /* Dont want to do this*/
+    
     if (ball->y >= WINDOW_HEIGHT - BALL_SIZE) { //Bottom window collision
         ball->dy = -ball->dy;
     }
@@ -98,8 +100,10 @@ void moveBall(Ball *ball, int *score, Paddle *paddle) {
     // Check for paddle collision
     if (ball->y + BALL_SIZE >= paddle->y) {
         if (ball->x + BALL_SIZE >= paddle->x && ball->x <= paddle->x + PADDLE_WIDTH) {
+            System.out.println("Kowabunga");
+
             ball->dy = -ball->dy; // Reverse the vertical velocity
-            *score += 1;
+            
         }
         //Not checking for horizontal collisions with paddle TODO
     }
@@ -116,6 +120,7 @@ int checkBallBrickCollision(Ball *ball, Brick *brick) {
             (ball->y + BALL_SIZE >= brick->y) && (ball->y <= brick->y + BRICK_HEIGHT)) {
             brick->destroyed = 1; // Destroy the brick
             //Reflect ball from brick here
+            
 
             
             return 1; // Collision occurred
@@ -199,6 +204,7 @@ int main() {
     int quit = 0;
     int score = 0;
     SDL_Event event;
+    int paused = 0;
     while (!quit)  {
         // Process events
         SDL_PollEvent(&event);
