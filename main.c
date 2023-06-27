@@ -14,7 +14,7 @@
 #define BRICK_WIDTH 5
 
 #define PADDLE_WIDTH 80
-#define PADDLE_HEIGHT 15 //Do not want to make it the same as ball height
+#define PADDLE_HEIGHT 5 //Do not want to make it the same as ball height
 #define PADDLE_SPEED 5
 
 #define BALL_SIZE 10
@@ -93,23 +93,23 @@ int moveBall(Ball *ball, int *score, Paddle *paddle) {
     }
     /* Dont want to do this*/
     
-    if (ball->y >= WINDOW_HEIGHT - BALL_SIZE) { //Bottom window collision
-        ball->dy = -ball->dy;
+    if (ball->y >= WINDOW_HEIGHT - BALL_SIZE) {
+        //Confirm loss of heart/life 
+        return 1;
     }
 
     // Check for paddle collision
     if (ball->y + BALL_SIZE >= paddle->y) {
         if (ball->x + BALL_SIZE >= paddle->x && ball->x <= paddle->x + PADDLE_WIDTH) {
-            printf("Kowabunga");
+            printf("got here");
 
             ball->dy = -ball->dy; // Reverse the vertical velocity
             
         }
         //Not checking for horizontal collisions with paddle TODO
     }
+    return 0;
 
-    //Check for brick collision
-    //TODO
 
 }
 
@@ -158,6 +158,14 @@ void drawBricks(SDL_Renderer *renderer, Brick *bricks, int numRows, int numCols)
     }
 }
 
+void initializeBall(Ball *ball) {
+    ball->x = WINDOW_WIDTH / 2 - BALL_SIZE / 2;
+    ball->y = WINDOW_HEIGHT / 2 - BALL_SIZE / 2;
+    ball->dx = BALL_SPEED_X;
+    ball->dy = BALL_SPEED_Y;  
+    
+}
+
 int main() {
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -187,12 +195,13 @@ int main() {
     // Initialize the paddle's position
     paddle.x = WINDOW_WIDTH / 2 - PADDLE_WIDTH / 2;
     paddle.y = WINDOW_HEIGHT - PADDLE_HEIGHT - 10;
-    
+    /*
     // Initialize the ball's position and velocity
     ball.x = WINDOW_WIDTH / 2 - BALL_SIZE / 2;
     ball.y = WINDOW_HEIGHT / 2 - BALL_SIZE / 2;
     ball.dx = BALL_SPEED_X;
-    ball.dy = BALL_SPEED_Y;
+    ball.dy = BALL_SPEED_Y; */
+    initializeBall(&ball);
     
     //Creating brick structs
     const int numRows = 5;
@@ -217,7 +226,10 @@ int main() {
         movePaddle(&paddle);
 
         // Move the ball and handle collisions
-        moveBall(&ball, &score, &paddle);
+        if (moveBall(&ball, &score, &paddle)) {
+            initializeBall(&ball);
+            score -= 100;
+        }
 
         // Check ball-brick collisions
         for (int row = 0; row < numRows; row++) {
