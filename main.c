@@ -10,8 +10,8 @@
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 
-#define BRICK_HEIGHT 5
-#define BRICK_WIDTH 5
+#define BRICK_HEIGHT 50
+#define BRICK_WIDTH 50
 
 #define PADDLE_WIDTH 80
 #define PADDLE_HEIGHT 5 //Do not want to make it the same as ball height
@@ -95,6 +95,7 @@ int moveBall(Ball *ball, int *score, Paddle *paddle) {
     
     if (ball->y >= WINDOW_HEIGHT - BALL_SIZE) {
         //Confirm loss of heart/life 
+        printf("Collided");
         return 1;
     }
 
@@ -102,6 +103,7 @@ int moveBall(Ball *ball, int *score, Paddle *paddle) {
     if (ball->y + BALL_SIZE >= paddle->y) {
         if (ball->x + BALL_SIZE >= paddle->x && ball->x <= paddle->x + PADDLE_WIDTH) {
             printf("got here");
+            printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
             ball->dy = -ball->dy; // Reverse the vertical velocity
             
