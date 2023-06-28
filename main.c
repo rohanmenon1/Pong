@@ -25,15 +25,17 @@
 
 
 /*
- *How to compile -  gcc -I src/include -L src/lib main.c -lSDL2
+ *How to compile -  gcc -I src/include -L src/lib -o game main.c -lSDL2
+ *Run ./game to play
  */
-//SDL_Rect struct only takes ints as parameters
+//SDL_Rect struct only takes ints as parameters!!
 // Structure for the pong ball
 typedef struct ballStruct {
     int x;
     int y;
     int dx;
-    int dy; // Velocity
+    int dy; //Velocity
+    int lastCollision; //0 if top window paddle, 1 if leftright,
 } Ball;
 
 // Structure for the paddle
@@ -86,15 +88,19 @@ int moveBall(Ball *ball, int *score, Paddle *paddle) {
 
     // Check for wall collisions
     if (ball->x <= 0 || ball->x + BALL_SIZE >= WINDOW_WIDTH) { //x collisions
-        ball->dx = -ball->dx; 
+        ball->dx = -ball->dx;     
+        ball->lastCollision = 1;    
     }
+    
     if (ball->y <= 0) { //Top window collision
         ball->dy = -ball->dy; 
+        ball->lastCollision = 0;
     }
     /* Dont want to do this*/
     
     if (ball->y >= WINDOW_HEIGHT - BALL_SIZE) {
         //Confirm loss of heart/life 
+
         printf("Collided");
         return 1;
     }
@@ -102,10 +108,9 @@ int moveBall(Ball *ball, int *score, Paddle *paddle) {
     // Check for paddle collision
     if (ball->y + BALL_SIZE >= paddle->y) {
         if (ball->x + BALL_SIZE >= paddle->x && ball->x <= paddle->x + PADDLE_WIDTH) {
-            printf("got here");
             printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-
             ball->dy = -ball->dy; // Reverse the vertical velocity
+            ball->lastCollision = 0;            
             
         }
         //Not checking for horizontal collisions with paddle TODO
@@ -122,6 +127,13 @@ int checkBallBrickCollision(Ball *ball, Brick *brick) {
             (ball->y + BALL_SIZE >= brick->y) && (ball->y <= brick->y + BRICK_HEIGHT)) {
             brick->destroyed = 1; // Destroy the brick
             //Reflect ball from brick here
+            if (ball->lastCollision == 0) {
+                ball->dx = -ball->dx;
+            }
+            else {
+                ball->dy = -ball->dy;
+            }
+            //ball->dx = -ball->dx;
             
 
             
@@ -165,6 +177,7 @@ void initializeBall(Ball *ball) {
     ball->y = WINDOW_HEIGHT / 2 - BALL_SIZE / 2;
     ball->dx = BALL_SPEED_X;
     ball->dy = BALL_SPEED_Y;  
+    ball->lastCollision = 0;
     
 }
 
@@ -229,7 +242,11 @@ int main() {
 
         // Move the ball and handle collisions
         if (moveBall(&ball, &score, &paddle)) {
-            initializeBall(&ball);
+            //Trying to create blinking effect
+            for (int k = 0; k < 5; k++) {
+                initializeBall(&ball);
+                SDL_Delay(800);
+            }
             score -= 100;
         }
 
