@@ -112,7 +112,7 @@ int moveBall(Ball *ball, int *score, Paddle *paddle) {
         if (ball->x + BALL_SIZE >= paddle->x && ball->x <= paddle->x + PADDLE_WIDTH) {
             printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
             ball->dy = -ball->dy; // Reverse the vertical velocity
-            //ball->lastCollision = 1;            
+            ball->lastCollision = 0;            
             
         }
         //Not checking for horizontal collisions with paddle TODO
@@ -136,7 +136,6 @@ int checkBallBrickCollision(Ball *ball, Brick *brick) {
                 ball->dy = -ball->dy;
             }
             //ball->dx = -ball->dx;
-            ball->lastCollision = 1;
             
 
             
@@ -287,7 +286,7 @@ int main() {
     }
 
     //Create window for game over
-    
+
 
     // Clean up resources
     SDL_DestroyRenderer(renderer);
