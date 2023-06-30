@@ -280,11 +280,13 @@ int main() {
         SDL_RenderPresent(renderer);
 
         // Print the score
-        printf("Score: %d\n", score);
+        printf("Score: %d Lives Left: %d\n", score, lives);
         SDL_Delay(10);
     }
 
     //Create window for game over
+    printf("Game over. Thank you for playing.\n");
+
 
 
     // Clean up resources
