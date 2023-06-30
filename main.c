@@ -6,6 +6,8 @@
 #include <stdio.h>
 #define SDL_MAIN_HANDLED //TODO: Find better alternative to stop winMain error
 #include <SDL2/SDL.h>
+//Including text library
+//#include <SDL2/SDL_
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -110,7 +112,7 @@ int moveBall(Ball *ball, int *score, Paddle *paddle) {
         if (ball->x + BALL_SIZE >= paddle->x && ball->x <= paddle->x + PADDLE_WIDTH) {
             printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
             ball->dy = -ball->dy; // Reverse the vertical velocity
-            ball->lastCollision = 0;            
+            //ball->lastCollision = 1;            
             
         }
         //Not checking for horizontal collisions with paddle TODO
@@ -134,6 +136,7 @@ int checkBallBrickCollision(Ball *ball, Brick *brick) {
                 ball->dy = -ball->dy;
             }
             //ball->dx = -ball->dx;
+            ball->lastCollision = 1;
             
 
             
@@ -245,7 +248,7 @@ int main() {
             //Trying to create blinking effect
             for (int k = 0; k < 5; k++) {
                 initializeBall(&ball);
-                SDL_Delay(800);
+                SDL_Delay(50);
             }
             score -= 100;
         }
