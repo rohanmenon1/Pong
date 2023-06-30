@@ -129,7 +129,7 @@ int checkBallBrickCollision(Ball *ball, Brick *brick) {
             (ball->y + BALL_SIZE >= brick->y) && (ball->y <= brick->y + BRICK_HEIGHT)) {
             brick->destroyed = 1; // Destroy the brick
             //Reflect ball from brick here
-            if (ball->lastCollision == 0) {
+            if (ball->lastCollision == 1) {
                 ball->dx = -ball->dx;
             }
             else {
