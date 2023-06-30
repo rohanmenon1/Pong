@@ -208,6 +208,9 @@ int main() {
     // Paddle and ball
     Paddle paddle;
     Ball ball;
+    int lives;
+
+    lives = 3;
 
     
     // Initialize the paddle's position
@@ -250,7 +253,10 @@ int main() {
                 initializeBall(&ball);
                 SDL_Delay(50);
             }
-            score -= 100;
+            lives -= 1;
+            if (lives == 0) {
+                quit = 1;
+            }
         }
 
         // Check ball-brick collisions
@@ -279,6 +285,9 @@ int main() {
         printf("Score: %d\n", score);
         SDL_Delay(10);
     }
+
+    //Create window for game over
+    
 
     // Clean up resources
     SDL_DestroyRenderer(renderer);
