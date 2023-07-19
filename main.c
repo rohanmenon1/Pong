@@ -23,8 +23,7 @@
 #define BALL_SPEED_X 1
 #define BALL_SPEED_Y 1
 
-#define Y 0
-#define X 1
+#define abs(x) ((x) > 0 ? (x) : -(x)) 
 
 /*
  *How to compile -  gcc -I src/include -L src/lib -o game main.c -lSDL2
@@ -36,14 +35,13 @@ typedef struct ballStruct {
     int x;
     int y;
     int dx;
-    int dy; //Velocity
-    int lastCollision; //0 if top window paddle, 1 if leftright,
+    int dy; 
 } Ball;
 
 // Structure for the paddle
 typedef struct paddleStruct {
     int x;
-    int y; // Position
+    int y;
 } Paddle;
 
 // Structure for a brick
@@ -91,12 +89,11 @@ int moveBall(Ball *ball, int *score, Paddle *paddle) {
     // Check for wall collisions
     if (ball->x <= 0 || ball->x + BALL_SIZE >= WINDOW_WIDTH) { //x collisions
         ball->dx = -ball->dx;     
-        ball->lastCollision = X;    
+            
     }
     
     if (ball->y <= 0) { //Top window collision
         ball->dy = -ball->dy; 
-        ball->lastCollision = Y;
     }
     /* Dont want to do this*/
     
@@ -112,7 +109,7 @@ int moveBall(Ball *ball, int *score, Paddle *paddle) {
         if (ball->x + BALL_SIZE >= paddle->x && ball->x <= paddle->x + PADDLE_WIDTH) {
             printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
             ball->dy = -ball->dy; // Reverse the vertical velocity
-            ball->lastCollision = Y;            
+                     
             
         }
         //Not checking for horizontal collisions with paddle TODO
@@ -129,12 +126,20 @@ int checkBallBrickCollision(Ball *ball, Brick *brick) {
             (ball->y + BALL_SIZE >= brick->y) && (ball->y <= brick->y + BRICK_HEIGHT)) {
             brick->destroyed = 1; // Destroy the brick
             //Reflect ball from brick here
-            if (ball->lastCollision == X) {
+            //Determining how to reflect based on relative position of ball and brick
+            int ballX = ball->x + BALL_SIZE / 2;
+            int ballY = ball->y + BALL_SIZE / 2;
+            int brickX = brick->x + BRICK_WIDTH / 2;
+            int brickY = brick->y + BRICK_HEIGHT / 2;
+            
+            if (abs(ballX - brickX) > abs(ballY - brickY)) {
                 ball->dx = -ball->dx;
             }
-            else if (ball->lastCollision == Y) {
+            else {
                 ball->dy = -ball->dy;
-            }         
+            }
+            
+                 
 
             
             return 1; // Collision occurred
@@ -177,7 +182,7 @@ void initializeBall(Ball *ball) {
     ball->y = WINDOW_HEIGHT / 2 - BALL_SIZE / 2;
     ball->dx = BALL_SPEED_X;
     ball->dy = BALL_SPEED_Y;  
-    ball->lastCollision = 0;
+    
     
 }
 
