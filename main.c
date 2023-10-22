@@ -146,7 +146,7 @@ int checkBallBrickCollision(Ball *ball, Brick *brick) {
         ball2.dx = ball->dx;
         ball2.dy = ball->dy;
         //Define deltax as a macro
-        if ((ball->y + BALL_SIZE >= brick->y) && (ball->y <= brick->y + BRICK_HEIGHT) && (isInside(&ball, brick)) && (!isInside(&ball2, brick) || !isInside(&ball1, brick))) {
+        if ((ball->y + BALL_SIZE >= brick->y) && (ball->y <= brick->y + BRICK_HEIGHT) && (isInside(ball, brick)) && (!isInside(&ball2, brick) || !isInside(&ball1, brick))) {
             brick->destroyed = 1;
             ball->dx = -ball->dx;
             return 1;
@@ -163,7 +163,7 @@ int checkBallBrickCollision(Ball *ball, Brick *brick) {
         ball3.dx = ball->dx;
         ball3.dy = ball->dy;
 
-        if ((ball->x + BALL_SIZE >= brick->x) && (ball->x <= brick->x + BRICK_WIDTH) && (isInside(&ball, brick)) && (!isInside(&ball3, brick) || !isInside(&ball4, brick))) {
+        if ((ball->x + BALL_SIZE >= brick->x) && (ball->x <= brick->x + BRICK_WIDTH) && (isInside(ball, brick)) && (!isInside(&ball3, brick) || !isInside(&ball4, brick))) {
             brick->destroyed = 1;
             ball->dy = -ball->dy;
             return 1;
