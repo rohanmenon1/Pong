@@ -20,6 +20,7 @@
 #define PADDLE_SPEED 5
 
 #define BALL_SIZE 10
+#define delta 1
 #define BALL_SPEED_X 1
 #define BALL_SPEED_Y 1
 
@@ -108,9 +109,7 @@ int moveBall(Ball *ball, int *score, Paddle *paddle) {
     if (ball->y + BALL_SIZE >= paddle->y) {
         if (ball->x + BALL_SIZE >= paddle->x && ball->x <= paddle->x + PADDLE_WIDTH) {
             printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-            ball->dy = -ball->dy; // Reverse the vertical velocity
-                     
-            
+            ball->dy = -ball->dy; // Reverse the vertical velocity 
         }
         //Not checking for horizontal collisions with paddle TODO
     }
@@ -122,6 +121,45 @@ int moveBall(Ball *ball, int *score, Paddle *paddle) {
 // Check if the ball collides with a brick
 int checkBallBrickCollision(Ball *ball, Brick *brick) {
     if (!brick->destroyed) {
+        //Collision along x
+        //Ball comes from left -> x + dx is inside and x - dx is not inside
+        Ball ball1;
+        ball1.x = ball->x + delta;
+        ball1.y = ball->y;
+        ball1.dx = ball->dx;
+        ball1.dy = ball->dy;
+        
+        Ball ball2;
+        ball2.x = ball->x - delta;
+        ball2.y = ball->y;
+        ball2.dx = ball->dx;
+        ball2.dy = ball->dy;
+        //Define deltax as a macro
+        if ((ball->y + BALL_SIZE >= brick->y) && (ball->y <= brick->y + BRICK_HEIGHT) && (isInside(&ball, brick)) && (!isInside(&ball2, brick) || !isInside(&ball1, brick))) {
+            brick->destroyed = 1;
+            ball->dx = -ball->dx;
+            return 1;
+        }
+        Ball ball3;
+        ball3.x = ball->x;
+        ball3.y = ball->y + delta;
+        ball3.dx = ball->dx;
+        ball3.dy = ball->dy;
+
+        Ball ball4;
+        ball3.x = ball->x;
+        ball3.y = ball->y - delta;
+        ball3.dx = ball->dx;
+        ball3.dy = ball->dy;
+
+        if ((ball->x + BALL_SIZE >= brick->x) && (ball->x <= brick->x + BRICK_WIDTH) && (isInside(&ball, brick)) && (!isInside(&ball3, brick) || !isInside(&ball4, brick))) {
+            brick->destroyed = 1;
+            ball->dy = -ball->dy;
+            return 1;
+        }
+
+
+        /*
         if ((ball->x + BALL_SIZE >= brick->x) && (ball->x <= brick->x + BRICK_WIDTH) &&
             (ball->y + BALL_SIZE >= brick->y) && (ball->y <= brick->y + BRICK_HEIGHT)) {
             brick->destroyed = 1; // Destroy the brick
@@ -143,7 +181,7 @@ int checkBallBrickCollision(Ball *ball, Brick *brick) {
 
             
             return 1; // Collision occurred
-        }
+        }*/
     }
 
     return 0; // No collision
@@ -155,6 +193,7 @@ void drawPaddle(SDL_Renderer *renderer, Paddle *paddle) {
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderFillRect(renderer, &paddleRect);
 }
+
 
 // Draw the ball on the screen
 void drawBall(SDL_Renderer *renderer, Ball *ball) {
@@ -186,7 +225,24 @@ void initializeBall(Ball *ball) {
     
 }
 
+int isInside(Ball *ball, Brick *brick) {
+   if ((ball->x + BALL_SIZE >= brick->x) && (ball->x <= brick->x + BRICK_WIDTH) &&
+       (ball->y + BALL_SIZE >= brick->y) && (ball->y <= brick->y + BRICK_HEIGHT)) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
 int main() {
+    int mode;
+    printf("Enter game more (1 or 2): ");
+    int retVal = scanf("%d", &mode);
+    if ((retVal == 1) && (mode == 1)) {
+        
+    }
+
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         printf("SDL initialization failed: %s\n", SDL_GetError());
