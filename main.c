@@ -118,6 +118,17 @@ int moveBall(Ball *ball, int *score, Paddle *paddle) {
 
 }
 
+
+int isInside(Ball *ball, Brick *brick) {
+   if ((ball->x + BALL_SIZE >= brick->x) && (ball->x <= brick->x + BRICK_WIDTH) &&
+       (ball->y + BALL_SIZE >= brick->y) && (ball->y <= brick->y + BRICK_HEIGHT)) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
 // Check if the ball collides with a brick
 int checkBallBrickCollision(Ball *ball, Brick *brick) {
     if (!brick->destroyed) {
@@ -223,16 +234,6 @@ void initializeBall(Ball *ball) {
     ball->dy = BALL_SPEED_Y;  
     
     
-}
-
-int isInside(Ball *ball, Brick *brick) {
-   if ((ball->x + BALL_SIZE >= brick->x) && (ball->x <= brick->x + BRICK_WIDTH) &&
-       (ball->y + BALL_SIZE >= brick->y) && (ball->y <= brick->y + BRICK_HEIGHT)) {
-        return 1;
-    }
-    else {
-        return 0;
-    }
 }
 
 int main() {
