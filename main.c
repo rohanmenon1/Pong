@@ -21,8 +21,8 @@
 
 #define BALL_SIZE 10
 #define delta 1
-#define BALL_SPEED_X 1
-#define BALL_SPEED_Y 1
+#define BALL_SPEED_X 3
+#define BALL_SPEED_Y 3
 
 #define abs(x) ((x) > 0 ? (x) : -(x)) 
 
@@ -80,6 +80,30 @@ void movePaddle(Paddle *paddle) {
     }
 }
 
+void moveAutoPaddle(Paddle *paddle, Ball *ball) {
+    if (ball->dy < 0) {
+        //Ball is moving towards the auto paddle
+        int t = ball->y / (-1) * ball->dy;
+        int x_cord = ball->x + ball->dx * t;
+        if (x_cord > paddle->x && paddle->x < WINDOW_WIDTH - PADDLE_WIDTH) {
+            paddle->x += PADDLE_SPEED / 2;
+        }
+        if (x_cord < paddle->x && paddle->x > 0) {
+            paddle->x -= PADDLE_SPEED / 2;
+        }
+    }
+    if (ball->dy > 0) {
+        //Ball is not moving towards the paddle
+        //int x_cord = 
+        int x_cord = ball->x;
+        if (x_cord > paddle->x && paddle->x < WINDOW_WIDTH - PADDLE_WIDTH) {
+            paddle->x += PADDLE_SPEED;
+        } 
+        if (x_cord < paddle->x && paddle->x > 0) {
+            paddle->x -= PADDLE_SPEED;
+        }
+    } 
+}
 // Move the ball and handle collisions
 //Changed return type to int to indicate if paddle collision ocurred
 int moveBall(Ball *ball, int *score, Paddle *paddle) {
@@ -116,6 +140,52 @@ int moveBall(Ball *ball, int *score, Paddle *paddle) {
     return 0;
 
 
+}
+
+int moveBallAuto(Ball *ball, int *score, int *autoScore, Paddle *paddle, Paddle *autoPaddle) {
+  // Move the ball
+    ball->x += ball->dx;
+    ball->y += ball->dy;
+
+    // Check for wall collisions
+    if (ball->x <= 0 || ball->x + BALL_SIZE >= WINDOW_WIDTH) { //x collisions
+        ball->dx = -ball->dx;     
+            
+    }
+    
+    if (ball->y <= 0) { //Top window collision
+        //ball->dy = -ball->dy;
+        printf("You won a point!");
+        *score += 1;
+        return 1; 
+    }
+    /* Dont want to do this*/
+    
+    if (ball->y >= WINDOW_HEIGHT - BALL_SIZE) {
+        //Confirm loss of heart/life 
+
+        printf("Collided");
+        *autoScore += 1;
+        return -1;
+    }
+
+    // Check for paddle collision
+    if (ball->y + BALL_SIZE >= paddle->y) {
+        if (ball->x + BALL_SIZE >= paddle->x && ball->x <= paddle->x + PADDLE_WIDTH) {
+            printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+            ball->dy = -ball->dy; // Reverse the vertical velocity 
+        }
+        //Not checking for horizontal collisions with paddle TODO
+    }
+
+    if (ball->y <= autoPaddle->y) {
+        //Collision with autoPaddle
+        if (ball->x + BALL_SIZE >= autoPaddle->x && ball->x <= autoPaddle->x + PADDLE_WIDTH) {
+            ball->dy = -ball->dy;
+        }
+    }
+
+    return 0; 
 }
 
 
@@ -213,6 +283,12 @@ void drawBall(SDL_Renderer *renderer, Ball *ball) {
     SDL_RenderFillRect(renderer, &ballRect);
 }
 
+void eraseBall(SDL_Renderer *renderer, Ball *ball) {
+    SDL_Rect ballRect = {ball->x, ball->y, BALL_SIZE, BALL_SIZE};
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderFillRect(renderer, &ballRect);
+}
+
 // Draw the bricks on the screen
 void drawBricks(SDL_Renderer *renderer, Brick *bricks, int numRows, int numCols) {
     for (int row = 0; row < numRows; row++) {
@@ -220,7 +296,7 @@ void drawBricks(SDL_Renderer *renderer, Brick *bricks, int numRows, int numCols)
             Brick *brick = &bricks[row * numCols + col];
             if (!(brick->destroyed))  {
                 SDL_Rect brickRect = {brick->x, brick->y, BRICK_WIDTH, BRICK_HEIGHT};
-                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+                SDL_SetRenderDrawColor(renderer, 188, 74, 60, 255);
                 SDL_RenderFillRect(renderer, &brickRect);
             }
         }
@@ -241,7 +317,125 @@ int main() {
     printf("Enter game more (1 or 2): ");
     int retVal = scanf("%d", &mode);
     if ((retVal == 1) && (mode == 1)) {
+       // Initialize SDL
+        if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+            printf("SDL initialization failed: %s\n", SDL_GetError());
+            return 1;
+        }
+
+        // Create a window
+        SDL_Window *window = SDL_CreateWindow("Pong", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+        if (window == NULL) {
+            printf("Window creation failed: %s\n", SDL_GetError());
+            return 1;
+        }
+
+        // Create a renderer
+        SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+        if (renderer == NULL) {
+            printf("Got rendering error: %s\n", SDL_GetError());
+            return 1;
+        }
+
+        // Paddle and ball
+        Paddle paddle;
+        Paddle autoPaddle;
+        Ball ball;
+        int lives;
+
+        lives = 3;
+
+        int opp_lives;
+        opp_lives = 3;
+
+    
+        // Initialize the paddle's position
+        paddle.x = WINDOW_WIDTH / 2 - PADDLE_WIDTH / 2;
+        paddle.y = WINDOW_HEIGHT - PADDLE_HEIGHT - 10; 
+
+
+        //Initialzie autoPaddle's position
+        autoPaddle.x = WINDOW_WIDTH / 2 - PADDLE_WIDTH / 2;
+        autoPaddle.y = 10;
+
+        initializeBall(&ball);
+
+        //Main loop
+        int quit = 0;
+        int user_score = 0;
+        int computer_score = 0;
+        SDL_Event event;
+        int paused = 0;
+        while (!quit)  {
+            // Process events
+            SDL_PollEvent(&event);
+            if (event.type == SDL_QUIT) {
+                quit = 1;
+            }
         
+
+            // Move the paddle based on user input
+            movePaddle(&paddle);
+            //Move auto paddle
+            moveAutoPaddle(&autoPaddle, &ball);
+            int ballRet = moveBallAuto(&ball, &user_score, &computer_score, &paddle, &autoPaddle);
+            if (ballRet == 1) {
+                //Trying to create blinking effect
+                for (int k = 0; k < 50; k++) {
+                    initializeBall(&ball);
+                    //eraseBall(renderer, &ball);
+                    SDL_Delay(10);
+                    //drawBall(renderer, &ball);
+                    //SDL_RenderPresent(renderer);
+                
+                }
+                opp_lives -= 1;
+                if (opp_lives == 0) {
+                    quit = 1;
+                }
+            }
+            else if (ballRet == -1) {
+                for (int k = 0; k < 50; k++) {
+                    initializeBall(&ball);
+                    SDL_Delay(10);
+             
+                }
+                lives -= 1;
+                if (lives == 0) {
+                    quit = 1;
+                }
+            }
+
+            // NEED TO CLEAR SCREEN BEFORE REDRAWING
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderClear(renderer);
+
+            //Draw the paddle, ball, and bricks
+            drawPaddle(renderer, &paddle);
+            drawPaddle(renderer, &autoPaddle);
+            drawBall(renderer, &ball);
+            //drawBricks(renderer, bricks, numRows, numCols);
+
+            //Update
+            //not using SDL_flip
+            SDL_RenderPresent(renderer);
+
+            // Print the score
+            printf("Your Score: %d Lives Left: %d\n", user_score, lives);
+            printf("Opponent score: %d Lives Left: %d\n",computer_score, opp_lives);
+            SDL_Delay(10);
+        }
+        //Create window for game over
+        printf("Game over. Thank you for playing.\n");
+
+
+
+        // Clean up resources
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+
+        return 0;
     }
 
     // Initialize SDL
@@ -308,9 +502,13 @@ int main() {
         // Move the ball and handle collisions
         if (moveBall(&ball, &score, &paddle)) {
             //Trying to create blinking effect
-            for (int k = 0; k < 5; k++) {
+            for (int k = 0; k < 50; k++) {
                 initializeBall(&ball);
-                SDL_Delay(50);
+                //eraseBall(renderer, &ball);
+                SDL_Delay(10);
+                //drawBall(renderer, &ball);
+                //SDL_RenderPresent(renderer);
+                
             }
             lives -= 1;
             if (lives == 0) {
